@@ -8,12 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 
 class ProductController extends AbstractController
 {
 
     #[Route('/api/products', name: 'product', methods: ['GET'])]
+    //#[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour accéder à cette fonctionalitée')]
     public function getProductList(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
         $productList = $productRepository->findAll();
