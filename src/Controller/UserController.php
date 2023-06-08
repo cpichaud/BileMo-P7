@@ -45,14 +45,11 @@ class UserController extends AbstractController
    {
        $user = $serializer->deserialize($request->getContent(), User::class, 'json');
    
-       // Récupération de l'ensemble des données envoyées sous forme de tableau
        $content = $request->toArray();
    
-       // Hashing the password before setting it to the user
        $password = $passwordHasher->hashPassword($user, $content['password']);
        $user->setPassword($password);
    
-       // Récupération de l'idClient. S'il n'est pas défini, alors on met -1 par défaut.
        $idClient = $content['idClient'] ?? -1;
    
        $client = $clientRepository->find($idClient);
@@ -72,5 +69,20 @@ class UserController extends AbstractController
        return new JsonResponse($jsonUser, Response::HTTP_CREATED, ["Location" => $location], true);
    }
    
+   #[Route('/api/clients/{clientId}/users/{userId}', name: 'deleteUser', methods: ['DELETE'])]
+    public function deleteUser(int $clientId, int $userId, UserRepository $userRepository, ClientRepository $clientRepository, EntityManagerInterface $em): Response
+    {
+        $client = $clientRepository->find($clientId);
+        $user = $userRepository->find($userId);
+
+        if (!$client || !$user || $user->getClient() !== $client) {
+            return new Response(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
 
 }
