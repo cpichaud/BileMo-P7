@@ -23,12 +23,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups('user:read')]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups('user:read')]
     private ?string $password = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
