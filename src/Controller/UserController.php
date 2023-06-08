@@ -21,13 +21,13 @@ class UserController extends AbstractController
 {
 
     #[Route('/api/users', name: 'user', methods: ['GET'])]
-    //#[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits pour accéder à cette fonctionalitée')]
     public function getUserList(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $userList = $userRepository->findAll();
-        $jsonUserList = $serializer->serialize($userList, 'json');
+        $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'user:read']);
         return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
     }
+    
 
     #[Route('/api/users/{id}', name: 'detailuser', methods: ['GET'])]
     public function getDetailUser(int $id, SerializerInterface $serializer, UserRepository $userRepository): JsonResponse 
@@ -41,7 +41,7 @@ class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
    }
 
-   #[Route('/api/users', name: 'createtUser', methods: ['POST'])]
+   #[Route('/api/users/create', name: 'createtUser', methods: ['POST'])]
    public function createUser(Request $request, SerializerInterface $serializer, UserRepository $userRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse 
    {
        $user = $serializer->deserialize($request->getContent(), User::class, 'json');
