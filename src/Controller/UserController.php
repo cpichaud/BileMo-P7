@@ -3,31 +3,38 @@
 namespace App\Controller;
 
 use App\Entity\user;
-use App\Repository\ClientRepository;
 use App\Repository\UserRepository;
+use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 
 class UserController extends AbstractController
 {
 
     #[Route('/api/users', name: 'user', methods: ['GET'])]
-    public function getUserList(UserRepository $userRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getUserList(UserRepository $userRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cachePool): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 3);
 
-        $userList = $userRepository->findAllUserWithPagination($page, $limit);
-        $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'user:read']);
+        $idCache = "getAllUsers-" . $page . "-" . $limit;
+
+        $jsonUserList = $cachePool->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer) {
+            $item->tag("usersCache");
+            $userList = $userRepository->findAllUserWithPagination($page, $limit);
+            return  $serializer->serialize($userList, 'json', ['groups' => 'user:read']);
+        });
 
         return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
     }
@@ -74,7 +81,7 @@ class UserController extends AbstractController
    }
    
    #[Route('/api/clients/{clientId}/users/{userId}', name: 'deleteUser', methods: ['DELETE'])]
-    public function deleteUser(int $clientId, int $userId, UserRepository $userRepository, ClientRepository $clientRepository, EntityManagerInterface $em): Response
+    public function deleteUser(int $clientId, int $userId, UserRepository $userRepository, ClientRepository $clientRepository, EntityManagerInterface $em, TagAwareCacheInterface $cachePool): Response
     {
         $client = $clientRepository->find($clientId);
         $user = $userRepository->find($userId);
@@ -83,10 +90,10 @@ class UserController extends AbstractController
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
+        $cachePool->invalidateTags(["usersCache"]);
         $em->remove($user);
         $em->flush();
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
-
 }
