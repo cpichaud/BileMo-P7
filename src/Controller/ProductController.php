@@ -13,6 +13,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+//use JMS\Serializer\SerializerInterface;
 
 class ProductController extends AbstractController
 {
@@ -31,8 +32,6 @@ class ProductController extends AbstractController
             return $productRepository->findAllWithPagination($page, $limit);
         });
 
-
-       // $productList = $productRepository->findAllWithPagination($page, $limit);
         $jsonproductList = $serializer->serialize($productList, 'json');
         return new JsonResponse($jsonproductList, Response::HTTP_OK, [], true);
     }
