@@ -4,9 +4,50 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *      "detail",
+ *      href = @Hateoas\Route(
+ *          "detailuser",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read")
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "create",
+ *      href = @Hateoas\Route(
+ *          "createtUser",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
+ *
+ * @Hateoas\Relation(
+ *      "delete",
+ *      href = @Hateoas\Route(
+ *          "deleteUser",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
+ * 
+ * @Hateoas\Relation(
+ *      "list",
+ *      href = @Hateoas\Route(
+ *          "users",
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read")
+ * )
+ *
+ */
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -15,26 +56,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('user:read')]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups('user:read')]
+    #[Groups(['user:read'])]
     private ?string $email = null;
 
-    #[ORM\Column]
-    #[Groups('user:read')]
+    #[\JMS\Serializer\Annotation\Type("array")]
+    #[ORM\Column(type:"json")]
+    #[Groups(['user:read'])]
     private array $roles = [];
+
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Groups('user:read')]
+    #[Groups(['user:read'])]
     private ?string $password = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups('user:read')]
+    #[Groups(['user:read'])]
     private ?Client $client = null;
 
     public function getId(): ?int

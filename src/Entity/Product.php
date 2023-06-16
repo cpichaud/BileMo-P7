@@ -8,6 +8,27 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
+
+/**
+ * @Hateoas\Relation(
+ *      "detail",
+ *      href = @Hateoas\Route(
+ *          "detailProduct",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read")
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "list",
+ *      href = @Hateoas\Route(
+ *          "product",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="user:read", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
+ */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

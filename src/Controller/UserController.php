@@ -5,14 +5,15 @@ namespace App\Controller;
 use App\Entity\user;
 use App\Repository\UserRepository;
 use App\Repository\ClientRepository;
+use JMS\Serializer\SerializerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +23,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UserController extends AbstractController
 {
 
-    #[Route('/api/users', name: 'user', methods: ['GET'])]
+    #[Route('/api/users', name: 'users', methods: ['GET'])]
     public function getUserList(UserRepository $userRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cachePool): JsonResponse
     {
         $page = $request->get('page', 1);
@@ -33,7 +34,8 @@ class UserController extends AbstractController
         $jsonUserList = $cachePool->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer) {
             $item->tag("usersCache");
             $userList = $userRepository->findAllUserWithPagination($page, $limit);
-            return  $serializer->serialize($userList, 'json', ['groups' => 'user:read']);
+            $context = SerializationContext::create()->setGroups(["user:read"]);
+            return  $serializer->serialize($userList, 'json', $context);
         });
 
         return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
@@ -44,7 +46,8 @@ class UserController extends AbstractController
     {
         $user = $userRepository->find($id);
         if ($user) {
-            $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'user:read']);
+            $context = SerializationContext::create()->setGroups(["user:read"]);
+            $jsonUser = $serializer->serialize($user, 'json', $context);
             return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
@@ -73,7 +76,8 @@ class UserController extends AbstractController
        $em->persist($user);
        $em->flush();
    
-       $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getusers']);
+       $context = SerializationContext::create()->setGroups(["user:read"]);
+       $jsonUser = $serializer->serialize($user, 'json', $context);
    
        $location = $urlGenerator->generate('detailuser', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
    
