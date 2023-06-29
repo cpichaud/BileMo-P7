@@ -1,6 +1,7 @@
 # BileMo-P7
 
 ![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8-8892BF)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d73fed0a5c0148d29183806223d9e0af)](https://app.codacy.com/gh/cpichaud/BileMo-P7/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ## Table des matières
 
