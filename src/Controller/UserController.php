@@ -72,7 +72,6 @@ class UserController extends AbstractController
        }
    
        $user->setClient($client);
-   
        $em->persist($user);
        $em->flush();
    
