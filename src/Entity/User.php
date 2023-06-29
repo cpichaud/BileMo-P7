@@ -33,10 +33,14 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *      "delete",
  *      href = @Hateoas\Route(
  *          "deleteUser",
- *          parameters = { "id" = "expr(object.getId())" },
+ *          parameters = {
+ *              "clientId" = "expr(object.getClient().getId())",
+ *              "userId" = "expr(object.getId())"
+ *          },
  *      ),
  *      exclusion = @Hateoas\Exclusion(groups="user:read", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
  * )
+
  *
  * 
  * @Hateoas\Relation(

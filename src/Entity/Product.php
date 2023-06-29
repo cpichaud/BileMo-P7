@@ -4,10 +4,9 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
 
-#[ORM\Entity(repositoryClass: ProductRepository::class)]
-class Product
-{
+
 
 /**
  * @Hateoas\Relation(
@@ -29,6 +28,10 @@ class Product
  * )
  *
  */
+#[ORM\Entity(repositoryClass: ProductRepository::class)]
+class Product
+{
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
