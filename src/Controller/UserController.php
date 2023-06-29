@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\user;
+use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Repository\ClientRepository;
 use JMS\Serializer\SerializerInterface;
@@ -18,11 +18,45 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class UserController extends AbstractController
 {
 
+    /**
+     * Cette méthode permet de récupérer l'ensemble des utilisateurs.
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Retourne la liste des utilisateurs",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+
+     *     )
+     * )
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="La page que l'on veut récupérer",
+     *     @OA\Schema(type="int")
+     * )
+     *
+     * @OA\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     description="Le nombre d'éléments que l'on veut récupérer",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Tag(name="User")
+     *
+     * @param UserRepository $userRepository
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/api/users', name: 'users', methods: ['GET'])]
     public function getUserList(UserRepository $userRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cachePool): JsonResponse
     {
@@ -53,8 +87,37 @@ class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-
+    /**
+     * @OA\Post(
+     *     path="/api/users/create",
+     *     summary="Créer un nouvel utilisateur",
+     *     tags={"User"},
+     *     @OA\RequestBody(
+     *         description="Données de l'utilisateur à créer",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", example="johndoe@gmail.com"),
+     *             @OA\Property(property="password", type="string", example="password123"),
+     *             @OA\Property(property="idClient", type="integer", example=12)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Utilisateur créé avec succès",
+     *         @OA\JsonContent(ref=@Model(type=User::class, groups={"user:read"}))
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Requête incorrecte"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     )
+     * )
+     */
    #[Route('/api/users/create', name: 'createtUser', methods: ['POST'])]
+   #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas accès à cette ressource")]
    public function createUser(Request $request, SerializerInterface $serializer, UserRepository $userRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse 
    {
        $user = $serializer->deserialize($request->getContent(), User::class, 'json');
@@ -84,6 +147,7 @@ class UserController extends AbstractController
    }
    
    #[Route('/api/clients/{clientId}/users/{userId}', name: 'deleteUser', methods: ['DELETE'])]
+   #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas accès à cette ressource")]
     public function deleteUser(int $clientId, int $userId, UserRepository $userRepository, ClientRepository $clientRepository, EntityManagerInterface $em, TagAwareCacheInterface $cachePool): Response
     {
         $client = $clientRepository->find($clientId);
