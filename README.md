@@ -2,14 +2,24 @@
 
 ![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8-8892BF)
 
-BileMo-P7 est un projet qui [description brève de ce que fait le projet].
-
 ## Table des matières
 
+- [Description des besoins](#Description)
 - [Prérequis](#prérequis)
 - [Installation](#installation)
-- [Documentation de l'API](#documentation-de-lapi)
 
+------
+## Description des besoins
+
+BileMo, entreprise spécialisée dans les téléphones mobiles haut de gamme, a pour projet de développer une vitrine B2B via une API. Cette interface permettra aux plateformes partenaires d'accéder à son catalogue. L'API doit permettre la consultation et la gestion de produits et d'utilisateurs associés aux clients BileMo.
+
+- consulter la liste des produits BileMo ;
+- consulter les détails d’un produit BileMo ;
+- consulter la liste des utilisateurs inscrits liés à un client sur le site web ;
+- consulter le détail d’un utilisateur inscrit lié à un client ;
+- ajouter un nouvel utilisateur lié à un client ;
+- supprimer un utilisateur ajouté par un client.
+------
 ## Prérequis
 
 Quels sont les prérequis nécessaires pour exécuter votre projet? Par exemple:
@@ -18,7 +28,7 @@ Quels sont les prérequis nécessaires pour exécuter votre projet? Par exemple:
 - Composer
 - Symfony CLI
 - MySQL
-
+------
 ## Installation
 
 Expliquez étape par étape comment installer votre projet. Par exemple:
@@ -35,9 +45,5 @@ Expliquez étape par étape comment installer votre projet. Par exemple:
     `php bin/console doctrine:database:create`
 6. Exécutez les migrations:
    `php bin/console doctrine:migrations:migrate`
-12. Télécharger les fixtures
+7. Télécharger les fixtures
     `php bin/console doctrine:fixture:load`
-
-## Documentation de l'API
-
-[Documentation API Bilmo](http://127.0.0.1:8000/api/doc)
